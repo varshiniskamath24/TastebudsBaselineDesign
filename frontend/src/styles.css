@@ -1,0 +1,357 @@
+/* GLOBAL */
+body {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  background: #f3f4ff;
+}
+
+/* APP LAYOUT */
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* HEADER */
+.header {
+  width: 100%;
+  max-width: 1000px;
+  padding: 20px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+  background: #6c63ff;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 700;
+  border-radius: 10px;
+  font-size: 18px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+}
+
+/* NAVIGATION */
+.nav button {
+  background: transparent;
+  border: none;
+  padding: 8px 14px;
+  margin-left: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.nav button.active {
+  background: #6c63ff;
+  color: white;
+}
+
+.nav .danger {
+  background: #ff4d4d;
+  color: white;
+}
+
+/* CONTENT */
+.content {
+  width: 100%;
+  max-width: 1000px;
+  background: white;
+  padding: 30px;
+  margin: 20px auto;
+  border-radius: 14px;
+  box-shadow: 0 4px 25px rgba(0,0,0,0.1);
+}
+
+.page-container {
+  width: 100%;
+  text-align: center;
+}
+
+/* BUTTONS */
+.primary-btn {
+  background: #6c63ff;
+  color: white;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.primary-btn:hover {
+  background: #5548e2;
+}
+
+.back-btn {
+  margin-bottom: 15px;
+}
+
+/* RESTAURANT HEADER */
+.page-title {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.rest-sub-info {
+  font-size: 14px;
+  color: #555;
+}
+
+/* MENU SECTION */
+.menu-heading {
+  margin-top: 20px;
+  margin-left: 10px;
+  text-align: left;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* MENU ITEM CARD */
+.menu-card {
+  background: white;
+  padding: 18px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  margin: 12px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: default;
+  transition: 0.15s;
+}
+
+.menu-card:hover {
+  background: #eef0ff;
+}
+
+.menu-left {
+  text-align: left;
+}
+
+.menu-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.menu-price {
+  color: #666;
+  margin-top: 3px;
+}
+
+/* ADD BUTTON */
+.menu-add-btn {
+  background: #6c63ff;
+  color: white;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.menu-add-btn:hover {
+  background: #5548e2;
+}
+
+/* QTY CONTROLS */
+.qty-btn {
+  width: 34px;
+  height: 34px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qty-number {
+  min-width: 25px;
+  font-size: 17px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* REMOVE BTN */
+.remove-btn {
+  background: #ff4d4d;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/* INLINE MESSAGE */
+.inline-msg {
+  margin-top: 10px;
+  padding: 10px 16px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 10px;
+  font-size: 15px;
+  display: inline-block;
+}
+
+/* FLOATING CART BAR */
+.floating-cart-bar {
+  position: fixed;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #6c63ff;
+  color: white;
+  padding: 14px 26px;
+  border-radius: 28px;
+  display: flex;
+  gap: 14px;
+  font-size: 18px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  cursor: pointer;
+  z-index: 5000;
+}
+
+.floating-cart-bar:hover {
+  background: #5548e2;
+}
+
+/* RESTAURANT LIST (HOME PAGE) */
+.restaurant-list {
+  margin-top: 20px;
+}
+
+.restaurant-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e2e2;
+  margin-bottom: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.restaurant-card:hover {
+  background: #f6f6ff;
+}
+
+.rest-left { text-align: left; }
+
+.rest-name {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.rest-cuisine {
+  font-size: 14px;
+  margin-top: 4px;
+  color: #555;
+}
+
+.rest-right {
+  text-align: right;
+}
+
+.rest-rating {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.rest-distance {
+  margin-top: 4px;
+  font-size: 14px;
+  color: #666;
+}
+/* ORDERS PAGE */
+.orders-list {
+  margin-top: 20px;
+}
+
+.order-card {
+  background: #ffffff;
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px solid #e5e5e5;
+  margin-bottom: 18px;
+  width: 100%;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+}
+
+.order-id {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.order-items {
+  margin-top: 10px;
+}
+
+.order-item-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 15px;
+}
+
+.order-item-name {
+  color: #444;
+}
+
+.order-item-price {
+  color: #222;
+  font-weight: 600;
+}
+
+.order-total {
+  margin-top: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #222;
+  border-top: 1px solid #ddd;
+  padding-top: 10px;
+}
+
+.order-status {
+  margin-top: 10px;
+  font-size: 15px;
+  color: #555;
+}
+
+.status-pill {
+  background: #e0e7ff;
+  color: #4338ca;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  margin-left: 4px;
+}
