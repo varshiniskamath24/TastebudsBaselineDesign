@@ -1,8 +1,11 @@
+// backend/routes/rescueRoutes.js
 const express = require("express");
-const { donateFood } = require("../controllers/rescueController");
-
 const router = express.Router();
+const rescueController = require("../controllers/rescueController");
+const requireAuth = require("../middleware/auth"); // optional: use if you want authenticated donors
 
-router.post("/donate", donateFood);
+// POST /api/rescue/donate
+// If you want only authenticated restaurants to donate, change to: router.post("/donate", requireAuth, rescueController.submitDonation)
+router.post("/donate", /* requireAuth, */ rescueController.submitDonation);
 
 module.exports = router;
