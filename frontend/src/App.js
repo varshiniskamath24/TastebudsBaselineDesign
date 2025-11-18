@@ -2,45 +2,45 @@
 import React, { useState, useEffect } from "react";
 import RegisterLogin from "./components/RegisterLogin";
 import FindFood from "./components/FindFood";
-import Donate from "./components/Donate";
+import DonateModern from "./components/DonateModern";
 import Orders from "./components/Orders";
 import Cart from "./components/Cart";
+
 import { CartProvider } from "./context/CartContext";
 import "./styles.css";
 
 function App() {
   const [page, setPage] = useState("findFood");
+
+  // customer token
   const [token, setToken] = useState(localStorage.getItem("token"));
 
-  // Make global navigation functions for FloatingCartBar & RestaurantDetails
+
   useEffect(() => {
     window.goToCart = () => setPage("cart");
-    window.openCart = () => setPage("cart"); // REQUIRED FIX
+    window.openCart = () => setPage("cart");
   }, []);
 
-  function logout() {
+  // CUSTOMER logout
+  function logoutCustomer() {
     localStorage.removeItem("token");
     setToken(null);
   }
 
-  // If user is NOT logged in → show login page
-  if (!token) {
-    return <RegisterLogin setToken={setToken} />;
-  }
 
   return (
     <CartProvider>
       <div className="app">
-
-        {/* TOP HEADER */}
+        {/* HEADER */}
         <div className="header">
           <div className="brand">
             <div className="logo">TB</div>
             <div className="title">TasteBuds</div>
           </div>
 
-          {/* Nav Buttons */}
+          {/* NAVIGATION */}
           <div className="nav">
+            {/* Customer navigation */}
             <button
               className={page === "findFood" ? "active" : ""}
               onClick={() => setPage("findFood")}
@@ -69,34 +69,20 @@ function App() {
               Cart
             </button>
 
-            <button className="danger" onClick={logout}>
+            <button className="danger" onClick={logoutCustomer}>
               Logout
             </button>
           </div>
         </div>
 
-        {/* MAIN CONTENT */}
+        {/* CONTENT */}
         <div className="content">
 
-          {page === "findFood" && (
-            <FindFood token={token} setPage={setPage} />
-          )}
-
-          {page === "donate" && (
-            <Donate token={token} />
-          )}
-
-          {page === "orders" && (
-            <Orders token={token} />
-          )}
-
-          {page === "cart" && (
-            <Cart
-              token={token}
-              goBack={() => setPage("findFood")} // Back button inside cart
-            />
-          )}
-
+          {/* Customer pages */}
+          {page === "findFood" && <FindFood token={token} setPage={setPage} />}
+          {page === "donate" && <DonateModern token={token} />}
+          {page === "orders" && <Orders token={token} />}
+          {page === "cart" && <Cart token={token} goBack={() => setPage("findFood")} />}
         </div>
       </div>
     </CartProvider>
