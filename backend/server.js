@@ -7,8 +7,9 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// ROUTES
 app.use("/api/restaurant", require("./routes/restaurantRoutes"));
+// add this line (place after restaurantRoutes require line)
+app.use("/api/rating", require("./routes/ratingRoutes"));  // ⭐ ADD THIS
 
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/recommend", require("./routes/recommendRoutes"));

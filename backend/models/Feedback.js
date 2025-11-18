@@ -1,12 +1,11 @@
-// backend/models/Feedback.js
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const FeedbackSchema = new mongoose.Schema({
-  orderId: { type: String, required: false },
-  userId: { type: String, required: true },
-  rating: { type: Number, required: true },
-  comments: { type: String, default: "" },
-  createdAt: { type: Date, default: Date.now },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  restaurantId: { type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant', required: true },
+  rating: { type: Number, required: true, min: 1, max: 5 },
+  comment: { type: String, default: '' },
+  createdAt: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model("Feedback", FeedbackSchema);
+module.exports = mongoose.model('Feedback', FeedbackSchema);
