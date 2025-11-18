@@ -355,3 +355,65 @@ body {
   font-weight: 600;
   margin-left: 4px;
 }
+
+/* Donate/NGO UI tweaks */
+.page-container { padding: 24px 16px; }
+.card { background: #fff; border-radius: 12px; padding: 12px; box-shadow: 0 6px 20px rgba(16,24,40,0.04); }
+.primary-btn { background: #6b46c1; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+.alert { padding: 10px 12px; background: #f3f4f6; border-radius: 8px; }
+.input { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
+
+
+/* SUCCESS ANIMATION */
+.success-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9000;
+}
+
+.success-box {
+  background: white;
+  padding: 30px 40px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.success-checkmark {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #4ade80;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 12px auto;
+  animation: popIn 0.3s ease;
+}
+
+.success-checkmark span {
+  font-size: 46px;
+  font-weight: 700;
+  color: white;
+}
+
+.success-text {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.3); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}

@@ -1,141 +1,119 @@
 // backend/controllers/rescueController.js
-const mongoose = require("mongoose");
 const NGO = require("../models/NGO");
 const Donation = require("../models/Donation");
 
-/**
- * POST /api/rescue/donate
- * Body (JSON):
- * {
- *   donorId (optional),
- *   donorName (optional),
- *   foodType,           // required
- *   quantity,           // required (Number)
- *   pickupLng,          // required (Number)
- *   pickupLat,          // required (Number)
- *   pickupInstructions (optional)
- * }
- *
- * Behavior (baseline):
- * - Save donation with status "Pending"
- * - Search NGOs that:
- *    - accept the given foodType
- *    - availability == true
- *    - capacityCurrent >= quantity
- *    - within 15 km
- * - Attempt to atomically decrement NGO.capacityCurrent and assign the donation
- * - If assigned -> update donation.assignedNgoId and donation.status = "Assigned"
- * - If none found -> leave donation as Pending and return that message
- */
+// OPTIONAL Twilio (commented)
+// const twilio = require("twilio");
+// const twilioClient = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH);
+// const SMS_FROM = process.env.TWILIO_NUMBER;
+
+function calcDistance(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lng2 - lng1) * Math.PI) / 180;
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
+
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 exports.submitDonation = async (req, res) => {
   try {
-    const {
-      donorId,
-      donorName,
+    const { foodType, quantity, pickupLat, pickupLng, pickupInstructions } =
+      req.body;
+
+    if (!foodType || !quantity || !pickupLat || !pickupLng) {
+      return res.status(400).json({
+        message:
+          "Missing required fields: foodType, quantity, pickupLat, pickupLng",
+      });
+    }
+
+    // 1. Store donation first
+    const donation = await Donation.create({
+      donorId: req.user.id,
       foodType,
       quantity,
-      pickupLng,
       pickupLat,
-      pickupInstructions
-    } = req.body;
-
-    // basic validation
-    if (!foodType || !quantity || pickupLng === undefined || pickupLat === undefined) {
-      return res.status(400).json({ message: "Missing required fields: foodType, quantity, pickupLng, pickupLat" });
-    }
-
-    const qty = Number(quantity);
-    if (isNaN(qty) || qty <= 0) {
-      return res.status(400).json({ message: "Invalid quantity" });
-    }
-
-    // Create donation (Pending)
-    const donation = new Donation({
-      donorId: donorId || null,
-      donorName: donorName || "",
-      foodType,
-      quantity: qty,
-      pickupInstructions: pickupInstructions || "",
-      pickupLocation: {
-        type: "Point",
-        coordinates: [Number(pickupLng), Number(pickupLat)]
-      },
-      status: "Pending"
+      pickupLng,
+      pickupInstructions,
+      status: "Pending",
+      timestamp: Date.now(),
     });
 
-    await donation.save();
+    // 2. Find eligible NGOs
+    let ngos = await NGO.find({
+      acceptedFoodTypes: { $in: [foodType] },
+      availability: true,
+      remainingCapacity: { $gte: quantity },
+    });
 
-    // Search for NGOs within 15 km (= 15000 meters)
-    const maxDistanceMeters = 15000;
-
-    // Use aggregation with $geoNear (requires NGO.location 2dsphere index)
-    const ngos = await NGO.aggregate([
-      {
-        $geoNear: {
-          near: { type: "Point", coordinates: [Number(pickupLng), Number(pickupLat)] },
-          distanceField: "dist.calculated",
-          spherical: true,
-          maxDistance: maxDistanceMeters,
-          query: {
-            acceptedFoodTypes: foodType,
-            availability: true,
-            capacityCurrent: { $gte: qty }
-          }
-        }
-      },
-      { $sort: { "dist.calculated": 1 } },
-      { $limit: 10 }
-    ]);
-
-    if (!ngos || ngos.length === 0) {
-      // No eligible NGO found within 15km
-      return res.status(200).json({
-        message: "Donation recorded (Pending). No eligible NGO found within 15 km.",
-        donation
+    if (ngos.length === 0) {
+      return res.json({
+        message: "Donation recorded (Pending). No eligible NGO found.",
       });
     }
 
-    // Try to reserve capacity atomically
-    let assignedNgo = null;
-    for (const ng of ngos) {
-      const updated = await NGO.findOneAndUpdate(
-        { _id: ng._id, capacityCurrent: { $gte: qty }, availability: true },
-        { $inc: { capacityCurrent: -qty } },
-        { new: true }
-      );
-      if (updated) {
-        assignedNgo = updated;
-        break;
-      }
-      // if reservation failed due to race condition, try next NGO
-    }
+    // 3. Find nearest NGO (within 15 km)
+    ngos = ngos
+      .map((ngo) => ({
+        ...ngo._doc,
+        distance: calcDistance(pickupLat, pickupLng, ngo.lat, ngo.lng),
+      }))
+      .filter((n) => n.distance <= 15)
+      .sort((a, b) => a.distance - b.distance);
 
-    if (!assignedNgo) {
-      return res.status(200).json({
-        message: "Donation recorded (Pending). No NGO could be reserved right now (race condition).",
-        donation
+    if (ngos.length === 0) {
+      return res.json({
+        message: "Donation recorded (Pending). No NGO within 15 km.",
       });
     }
 
-    // Update donation to Assigned
-    donation.assignedNgoId = assignedNgo._id;
+    const ngo = ngos[0];
+
+    // 4. Deduct capacity
+    ngo.remainingCapacity -= quantity;
+    await NGO.findByIdAndUpdate(ngo._id, {
+      remainingCapacity: ngo.remainingCapacity,
+    });
+
+    // 5. Assign donation
     donation.status = "Assigned";
+    donation.assignedNgo = ngo._id;
     await donation.save();
 
-    return res.status(200).json({
-      message: "Donation recorded and assigned to NGO.",
-      donation,
-      assignedNgo: {
-        id: assignedNgo._id,
-        name: assignedNgo.name,
-        contact: assignedNgo.contact,
-        address: assignedNgo.address,
-        remainingCapacity: assignedNgo.capacityCurrent
-      }
-    });
+    // 6. Notify NGO (SMS Simulation)
+    console.log(
+      `📩 SMS to NGO ${ngo.phone}: New donation of ${quantity}kg ${foodType}. Pickup at lat=${pickupLat}, lng=${pickupLng}. Instructions: ${pickupInstructions}`
+    );
 
+    // OPTIONAL TWILIO
+    /*
+    await twilioClient.messages.create({
+      body: `New donation: ${quantity}kg ${foodType}. Pickup instructions: ${pickupInstructions}`,
+      from: SMS_FROM,
+      to: ngo.phone
+    });
+    */
+
+    res.json({
+      message: "Donation recorded and assigned.",
+      assignedNgo: {
+        _id: ngo._id,
+        name: ngo.name,
+        phone: ngo.phone,
+        address: ngo.address,
+        lat: ngo.lat,
+        lng: ngo.lng,
+        remainingCapacity: ngo.remainingCapacity,
+      },
+    });
   } catch (err) {
-    console.error("rescue.submitDonation error:", err);
-    return res.status(500).json({ message: "Server error" });
+    console.error("Donation error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };

@@ -17,6 +17,10 @@ app.use("/api/rescue", require("./routes/rescueRoutes"));
 app.use("/api/orders", require("./routes/orderRoutes"));  // ← works now
 //app.use("/api/feedback", require("./routes/feedbackRoutes"));
 
+// after mongoose.connect(...).then(...)
+const { startCapacityRefresher } = require("./jobs/capacityRefresher");
+// start refresher with interval 60s for demo
+startCapacityRefresher({ intervalMs: 60 * 1000 });
 // CONNECT TO MONGODB
 mongoose
   .connect(process.env.MONGO_URI)
